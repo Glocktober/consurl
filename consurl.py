@@ -34,7 +34,7 @@ def arg_parse():
         epilog='\n'+ ('-'*25))
     
     def_prof = os.environ.get('AWS_PROFILE','default')
-
+    def_role_name = os.environ.get('AWS_SHORT_ROLE', def_role_name)
     if env_role_name := os.environ.get('AWS_ROLE_ARN'):
         def_role_name = env_role_name.split('/')[-1]
     
