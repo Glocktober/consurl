@@ -34,7 +34,7 @@ def arg_parse():
         epilog='\n'+ ('-'*25))
     
     def_prof = os.environ.get('AWS_PROFILE','default')
-
+    def_role_name = os.environ.get('AWS_SHORT_ROLE', def_role_name)
     if env_role_name := os.environ.get('AWS_ROLE_ARN'):
         def_role_name = env_role_name.split('/')[-1]
     
@@ -130,15 +130,19 @@ def get_credentials(args):
         role_name = args.short_role_name or def_role_name
         role_to_assume = role_template.format(account=account_id, rolename=role_name)
 
-    ret = sts.assume_role(
-        RoleArn = role_to_assume,
-        RoleSessionName = args.name,
-        DurationSeconds = args.duration,
-    )
+    try:
+        ret = sts.assume_role(
+            RoleArn = role_to_assume,
+            RoleSessionName = args.name,
+            DurationSeconds = args.duration,
+        )
+    except Exception as e:
+        eprint(e)
 
     if not 'Credentials' in ret:
-        vprint('Error: Assuming Role', ret)
-        raise Exception('STS: Assume role failed')
+        eprint(f'Error: Assuming Role {role_to_assume}')
+        vprint(ret)
+        return None
     
     vprint(f'role {role_to_assume} has been assumed.')
     return { # return format for sts sigin.aws.amazon.com/federation
@@ -176,6 +180,8 @@ def get_console_url(args):
 
     # Get credentials, maybe assume the role
     session_creds = get_credentials(args)
+    if session_creds is None:
+        return None
     
     #  build the token request and fetch the sign-in token
     url = request_signin_token(args, session_creds)
@@ -199,8 +205,8 @@ def get_console_url(args):
         return None
 
 
-def consurl():
-    
+if __name__ == '__main__':
+
     args = arg_parse()
     if args.verbose:
         verbose = True
@@ -219,5 +225,3 @@ def consurl():
                 raise e
             eprint(e)
 
-if __name__ == '__main__':
-    consurl()
