@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-copyright = 'copyright 2021 r.kras'
+copyright = 'copyright 2024 r.kras'
 import argparse
 import json
 import os
@@ -205,8 +205,7 @@ def get_console_url(args):
         return None
 
 
-if __name__ == '__main__':
-
+def consurl():
     args = arg_parse()
     if args.verbose:
         verbose = True
@@ -225,3 +224,6 @@ if __name__ == '__main__':
                 raise e
             eprint(e)
 
+
+if __name__ == '__main__':
+    consurl()
